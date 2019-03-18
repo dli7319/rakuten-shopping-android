@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import android.os.AsyncTask
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +37,7 @@ class SearchResultsAdapter(private val context: Context) : RecyclerView.Adapter<
 
 //        Clear the view
         viewHolder.itemImage.setImageBitmap(null)
+        viewHolder.itemImage.setBackgroundColor(Color.TRANSPARENT)
         viewHolder.itemListPrice.visibility = View.INVISIBLE
 
         val itemInfo = arrayOfItems.getJSONObject(position)
@@ -63,12 +64,6 @@ class SearchResultsAdapter(private val context: Context) : RecyclerView.Adapter<
 
     private fun setItemImage(viewHolder: ItemViewHolder, position: Int) {
         val url = viewHolder.itemImageUrl ?: return
-        Log.i(TAG, "bitmap SetImageFromUrl called $url")
-        if (arrayOfImages[position] != null) {
-            viewHolder.itemImage.setImageBitmap(arrayOfImages[position])
-            return
-        }
-        Log.i(TAG, "bitmap calling asynctask  $url")
         DownloadAndSaveImageTask(viewHolder, arrayOfImages, position, url).execute()
     }
 
@@ -77,17 +72,23 @@ class SearchResultsAdapter(private val context: Context) : RecyclerView.Adapter<
         val position: Int, val url: String
     ) : AsyncTask<Void, Void, Bitmap?>() {
         val viewHolderRef: WeakReference<ItemViewHolder> = WeakReference(viewHolder)
-        val arrayImagesRef: WeakReference<Array<Bitmap?>> = WeakReference((arrayOfImages))
+        val arrayImagesRef: WeakReference<Array<Bitmap?>> = WeakReference(arrayOfImages)
 
         override fun doInBackground(vararg params: Void?): Bitmap? {
             var image: Bitmap? = null
+            val arrayOfImages = arrayImagesRef.get()
+            if (arrayOfImages != null && arrayOfImages[position] != null) {
+                return arrayOfImages[position]
+            }
             try {
                 val inStream = URL(url).openStream()
                 image = BitmapFactory.decodeStream(inStream)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            arrayImagesRef.get()?.set(position, image)
+            if (image != null) {
+                arrayOfImages?.set(position, image)
+            }
             return image
         }
 

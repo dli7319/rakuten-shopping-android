@@ -2,4 +2,6 @@
 <resources>
 
     <dimen name="header_search_ib_padding">12dp</dimen>
+    <dimen name="search_item_height">128dp</dimen>
+    <dimen name="search_item_image_margin">8dp</dimen>
 </resources>
