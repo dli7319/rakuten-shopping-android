@@ -8,12 +8,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import android.os.AsyncTask
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONArray
 import java.lang.ref.WeakReference
 import java.net.URL
@@ -110,9 +110,9 @@ class SearchResultsAdapter(private val context: Context) : RecyclerView.Adapter<
         return arrayOfItems.length()
     }
 
-    fun setItemData(newData: JSONArray) {
+    fun setItemData(newData: JSONArray, newImages: Array<Bitmap?>) {
         arrayOfItems = newData
-        arrayOfImages = Array(arrayOfItems.length()) { null }
+        arrayOfImages = newImages
         notifyDataSetChanged()
     }
 

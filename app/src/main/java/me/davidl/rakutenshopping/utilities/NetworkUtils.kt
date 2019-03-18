@@ -1,15 +1,15 @@
 package me.davidl.rakutenshopping.utilities
 
-import android.net.Uri;
+import android.os.AsyncTask
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import me.davidl.rakutenshopping.SearchResultsViewModel
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedWriter
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -102,6 +102,29 @@ class NetworkUtils {
                 }
             } finally {
                 urlConnection.disconnect()
+            }
+        }
+
+        public fun executeSearchQuery(searchTerm: String, viewModel: SearchResultsViewModel) {
+            if (viewModel.lastSearchQuery != searchTerm) {
+                RakutenSearchQueryTask(viewModel).execute(searchTerm)
+            }
+        }
+
+
+        private class RakutenSearchQueryTask internal constructor(var viewModel: SearchResultsViewModel)
+            : AsyncTask<String, Void, JSONArray?>() {
+
+            override fun doInBackground(vararg params: String?): JSONArray? {
+                viewModel.lastSearchQuery = params[0]!!
+                val response = NetworkUtils.submitSearchQuery(params[0] as String)
+                val searchResults = response?.getJSONObject("data")?.getJSONObject("searchResults")
+                return searchResults?.getJSONArray("docs")
+            }
+
+            override fun onPostExecute(result: JSONArray?) {
+                super.onPostExecute(result)
+                viewModel.getArrayOfItems().value = result
             }
         }
     }

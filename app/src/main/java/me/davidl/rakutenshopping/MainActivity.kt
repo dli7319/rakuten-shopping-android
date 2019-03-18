@@ -2,11 +2,14 @@ package me.davidl.rakutenshopping
 
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.PagerSnapHelper
-import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.webkit.CookieManager
+import android.webkit.WebView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import me.davidl.rakutenshopping.utilities.RakutenHomepage
 import java.lang.ref.WeakReference
@@ -61,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             val context = contextRef.get()
             if (result != null && context != null) {
                 context.carouselAdapter.setData(result)
-                context.rv_carousel.visibility = View.VISIBLE
+                context.carouselRV.visibility = View.VISIBLE
             }
         }
     }

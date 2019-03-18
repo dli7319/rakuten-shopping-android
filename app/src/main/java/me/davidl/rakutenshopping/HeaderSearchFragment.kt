@@ -3,12 +3,12 @@ package me.davidl.rakutenshopping
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.fragment.app.Fragment
 
 class HeaderSearchFragment() : Fragment() {
 
@@ -59,9 +59,12 @@ class HeaderSearchFragment() : Fragment() {
 
     private fun executeSearch() {
         val searchTerm = mSearchEditText?.text.toString()
-        Toast.makeText(activity, "Search button clicked $searchTerm", Toast.LENGTH_LONG).show()
-        val searchIntent = Intent(activity, SearchResultsActivity::class.java)
-        searchIntent.putExtra(SearchResultsActivity.SEARCH_TERM_EXTRA, searchTerm)
-        startActivity(searchIntent)
+        if (activity is SearchResultsActivity) {
+            (activity as SearchResultsActivity).executeSearch(searchTerm)
+        } else {
+            val searchIntent = Intent(activity, SearchResultsActivity::class.java)
+            searchIntent.putExtra(SearchResultsActivity.SEARCH_TERM_EXTRA, searchTerm)
+            startActivity(searchIntent)
+        }
     }
 }

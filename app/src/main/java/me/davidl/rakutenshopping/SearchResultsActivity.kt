@@ -1,13 +1,15 @@
 package me.davidl.rakutenshopping
 
-import android.os.AsyncTask
-import android.support.v7.app.AppCompatActivity
+import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import me.davidl.rakutenshopping.utilities.NetworkUtils
 import org.json.JSONArray
-import java.lang.ref.WeakReference
 
 class SearchResultsActivity : AppCompatActivity() {
     companion object {
@@ -38,39 +40,45 @@ class SearchResultsActivity : AppCompatActivity() {
             .add(R.id.fl_search_fragment, headerFragment)
             .commit()
 
-        if (searchTerm != null) {
-            makeSearchQuery(searchTerm)
-        }
+        setupViewModel()
+        executeSearch(searchTerm)
 
         itemListRV = findViewById(R.id.rv_item_list)
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        val layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         itemListRV.layoutManager = layoutManager
         itemListRV.setHasFixedSize(true)
         itemListAdapter = SearchResultsAdapter(this)
         itemListRV.adapter = itemListAdapter
     }
 
-    private fun makeSearchQuery(searchTerm: String) {
-        RakutenSearchQueryTask(this).execute(searchTerm)
+    override fun onDestroy() {
+        super.onDestroy()
+        val viewModel = ViewModelProviders.of(this as FragmentActivity)
+            .get<SearchResultsViewModel>(SearchResultsViewModel::class.java)
+        val layoutModel = itemListRV.layoutManager as LinearLayoutManager
+        viewModel.scrollPosition = layoutModel.findFirstVisibleItemPosition()
     }
 
-    private class RakutenSearchQueryTask internal constructor(context: SearchResultsActivity)
-        : AsyncTask<String, Void, JSONArray?>() {
-        val activityRef = WeakReference(context)
-
-        override fun doInBackground(vararg params: String?): JSONArray? {
-            val response = NetworkUtils.submitSearchQuery(params[0] as String)
-            val searchResults = response?.getJSONObject("data")?.getJSONObject("searchResults")
-            return searchResults?.getJSONArray("docs")
-
-        }
-
-        override fun onPostExecute(result: JSONArray?) {
-            super.onPostExecute(result)
-            val activity = activityRef.get()
-            if (result != null) {
-                activity?.itemListAdapter?.setItemData(result)
+    private fun setupViewModel() {
+        val viewModel = ViewModelProviders.of(this as FragmentActivity)
+            .get<SearchResultsViewModel>(SearchResultsViewModel::class.java)
+        viewModel.getArrayOfItems().observe(this, Observer<JSONArray> {
+            if (it != null) {
+                val imagesArray = Array<Bitmap?>(it.length()) { null }
+                viewModel.getArrayOfImages().value = imagesArray
+                itemListAdapter.setItemData(it, imagesArray)
+                itemListRV.scrollToPosition(viewModel.scrollPosition)
             }
+
+        })
+
+    }
+
+    fun executeSearch(searchTerm: String?) {
+        val viewModel = ViewModelProviders.of(this as FragmentActivity)
+            .get<SearchResultsViewModel>(SearchResultsViewModel::class.java)
+        if (searchTerm != null) {
+            NetworkUtils.executeSearchQuery(searchTerm, viewModel)
         }
     }
 }
