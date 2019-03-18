@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">RakutenShopping</string>
-    <string name="search_hint">Search by keywords</string>
+    <string name="search_hint">I\'m shopping for...</string>
+
+
+    <!--Placeholder Values-->
+    <string name="placeholder_item_title">INTEL SSDPEKNW020T8X1 660P M.2 80MM 2TB PCIE3.0X4 3D2 QLC SINGLE PACK RETAIL</string>
+    <string name="placeholder_price">$240.00</string>
+    <string name="placeholder_list_price">$250.00</string>
+
+    <string name="addDollarSign">$%1$s</string>
 </resources>
